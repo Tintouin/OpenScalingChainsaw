@@ -74,7 +74,7 @@ class Player(pygame.sprite.Sprite):
         # Vecteur de mouvement du joueur
         self.movementVector = [0, 0]
         # Vitesse de déplacement du joueur
-        self.movementSpeed = 3
+        self.movementSpeed = 4
         # Liste des armes disponibles pour le joueur
         self.availableWeapons = [Weapon.Pistol(), Weapon.Shotgun(), Weapon.MachineGun()]
         # Arme équipée par défaut pour le joueur

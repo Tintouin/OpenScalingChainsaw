@@ -8,14 +8,16 @@ from Projectile import Projectile
 pygame.init()
 pygame.mixer.init()
 gunshot = pygame.mixer.Sound("sons/player/gun/shot.wav")
-while pygame.mixer.get_busy():
-    pygame.time.delay(100)
+
 
 
 size    = (1000, 800)
 BGCOLOR = (255, 255, 200)
 screen = pygame.display.set_mode(size)
-scoreFont = pygame.font.Font("fonts/UpheavalPro.ttf", 30)
+uiweapons = [pygame.image.load("sprites/ui/gameui/gunbig.png"),
+             pygame.image.load("sprites/ui/gameui/shotgunbig.png"),
+             pygame.image.load("sprites/ui/gameui/smgbig.png")]
+scoreFont = pygame.font.Font("fonts/Lady Radical 2.ttf", 30)
 healthFont = pygame.font.Font("fonts/OmnicSans.ttf", 50)
 healthRender = healthFont.render('z', True, pygame.Color('red'))
 pygame.display.set_caption("Top Down")
@@ -29,8 +31,7 @@ sczdqore = 0
 clock = pygame.time.Clock()
 
 def render_menu():
-    print("AUMOINCACAMARCHE")
-    reloadrender = scoreFont.render("MesboulesRECGARGEMRNT", True, pygame.Color('black'))
+    reloadrender = scoreFont.render("RECGARGEMRNT", True, pygame.Color('black'))
     scoreRect = reloadrender.get_rect()
     scoreRect.right = size[0] - 100
     scoreRect.top = 20
@@ -38,7 +39,6 @@ def render_menu():
 
 def move_entities(hero, enemies, timeDelta):
     score = 0
-    holster=0
     hero.sprite.move(screen.get_size(), timeDelta)
     for enemy in enemies:
         enemy.move(enemies, hero.sprite.rect.topleft, timeDelta)
@@ -49,13 +49,16 @@ def move_entities(hero, enemies, timeDelta):
             proj.kill()
             hero.sprite.health -= 1
             if hero.sprite.health <= 0:
-                hero.sprite.alive = False
+                hero.sprite.alive = True#False
     for proj in Player.projectiles:
         proj.move(screen.get_size(), timeDelta)
         enemiesHit = pygame.sprite.spritecollide(proj, enemies, True)
-        if enemiesHit:
+        if enemiesHit and hero.sprite.holster != 1:
             proj.kill()
             score += len(enemiesHit)
+        #Putain mais au lieu de faire un elif pourquoi pas juste mettre "else if:" ? ça craint...
+        elif enemiesHit:
+            score += len(enemiesHit)   
     return score
 
 def render_entities(hero, enemies):
@@ -86,17 +89,14 @@ def process_keys(keys, hero):
 def process_mouse(mouse, hero):
     if mouse[0]:
         hero.sprite.shoot(pygame.mouse.get_pos())
-        if hero.sprite.holster==1:
-            gunshot.play
-            while pygame.mixer.get_busy():
-                pygame.time.delay(100)
+
             
 
 def game_loop():
     show_menu = False
     done = False
     hero = pygame.sprite.GroupSingle(Player(screen.get_size()))
-    #enemies = pygame.sprite.Group()
+    enemies = pygame.sprite.Group()
     lastEnemy = pygame.time.get_ticks()
     score = 0
     
@@ -120,7 +120,7 @@ def game_loop():
         if keys[pygame.K_e]:
             show_menu = not show_menu   
 
-        """# Enemy spawning process
+        # Enemy spawning process
         if lastEnemy < currentTime - 200 and len(enemies) < 50:
             spawnSide = random.random()
             if spawnSide < 0.25:
@@ -131,7 +131,7 @@ def game_loop():
                 enemies.add(Enemy((random.randint(0, size[0]), 0)))
             else:
                 enemies.add(Enemy((random.randint(0, size[0]), size[1])))
-            lastEnemy = currentTime"""
+            lastEnemy = currentTime
         
         score += move_entities(hero, enemies, clock.get_time()/17)
         render_entities(hero, enemies)
@@ -140,15 +140,27 @@ def game_loop():
         for hp in range(hero.sprite.health):
             screen.blit(healthRender, (15 + hp*35, 0))
         scoreRender = scoreFont.render(str(score), True, pygame.Color('black'))
+        weaponRender = uiweapons[0]
+        #ammoRender = scoreFont.render(str(ammo), True, pygame.Color('black'))
+        
         scoreRect = scoreRender.get_rect()
         scoreRect.right = size[0] - 20
         scoreRect.top = 20
+
+        weaponRect = weaponRender.get_rect()
+        weaponRect.left = 20
+        weaponRect.top = 55
+
+        
+
         if hero.sprite.holster == 1:
-            weaponRender = pygame.image.load("sprites/ui/gameui/gunbig.png")
+            weaponRender = uiweapons[0]
         elif hero.sprite.holster == 2:
-            weaponRender = pygame.image.load("sprites/ui/gameui/shotgunbig.png")
+            weaponRender = uiweapons[1]
+        elif hero.sprite.holster == 3:
+            weaponRender = uiweapons[2]
         screen.blit(scoreRender, scoreRect)
-        screen.blit(weaponRender, scoreRect)
+        screen.blit(weaponRender, weaponRect)
         
         pygame.display.flip()
         clock.tick(120)
