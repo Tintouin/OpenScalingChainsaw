@@ -7,7 +7,29 @@ from Projectile import Projectile
 
 pygame.init()
 pygame.mixer.init()
-gunshot = pygame.mixer.Sound("sons/player/gun/shot.wav")
+
+gunSounds=[pygame.mixer.Sound("sons/player/gun/window_open.mp3"),
+           pygame.mixer.Sound("sons/player/gun/window_close.wav"),
+           pygame.mixer.Sound("sons/player/gun/shellin.wav"),
+           pygame.mixer.Sound("sons/player/gun/unload1.wav"),
+           pygame.mixer.Sound("sons/player/gun/unload2.wav"),
+           pygame.mixer.Sound("sons/player/gun/shot.wav"),
+           pygame.mixer.Sound("sons/player/gun/empty.wav")]
+shotgunSounds=[pygame.mixer.Sound("sons/player/shotgun/window_open.wav"),
+               pygame.mixer.Sound("sons/player/shotgun/window_close.wav"),
+               pygame.mixer.Sound("sons/player/shotgun/shellin.wav"),
+               pygame.mixer.Sound("sons/player/shotgun/unload1.wav"),
+               pygame.mixer.Sound("sons/player/shotgun/unload2.wav"),
+               pygame.mixer.Sound("sons/player/shotgun/shot.wav"),
+               pygame.mixer.Sound("sons/player/shotgun/doubleshot.wav"),
+               pygame.mixer.Sound("sons/player/shotgun/empty.wav")]
+smgSounds=[pygame.mixer.Sound("sons/player/smg/uncock.wav"),
+           pygame.mixer.Sound("sons/player/smg/unload.wav"),
+           pygame.mixer.Sound("sons/player/smg/reload.wav"),
+           pygame.mixer.Sound("sons/player/smg/cock.wav"),
+           pygame.mixer.Sound("sons/player/smg/shot.wav"),
+           pygame.mixer.Sound("sons/player/smg/empty.wav")]
+
 
 
 
@@ -17,8 +39,8 @@ screen = pygame.display.set_mode(size)
 uiweapons = [pygame.image.load("sprites/ui/gameui/gunbig.png"),
              pygame.image.load("sprites/ui/gameui/shotgunbig.png"),
              pygame.image.load("sprites/ui/gameui/smgbig.png")]
-scoreFont = pygame.font.Font("fonts/Lady Radical 2.ttf", 30)
-healthFont = pygame.font.Font("fonts/OmnicSans.ttf", 50)
+scoreFont = pygame.font.Font("polices/Lady Radical 2.ttf", 30)
+healthFont = pygame.font.Font("polices/OmnicSans.ttf", 50)
 healthRender = healthFont.render('z', True, pygame.Color('red'))
 pygame.display.set_caption("Top Down")
 
@@ -92,34 +114,47 @@ def process_mouse(mouse, hero):
 
             
 
-def game_loop():
-    show_menu = False
+def game_loop():  
     done = False
     hero = pygame.sprite.GroupSingle(Player(screen.get_size()))
     enemies = pygame.sprite.Group()
     lastEnemy = pygame.time.get_ticks()
+    gameState= 0
     score = 0
-    
+    print(gameState)
+
     while hero.sprite.alive and not done:
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
         currentTime = pygame.time.get_ticks()
-        isreloading = False
+       
         
         for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:            
+                    if gameState != 1:
+                        if hero.sprite.holster == 1:
+                            gunSounds[0].play()
+                        elif hero.sprite.holster == 2:
+                            shotgunSounds[0].play()
+                        gameState = 1
+                    else:        #ah le voilà le fameux else if {} hehe !
+                        if hero.sprite.holster == 1:
+                            gunSounds[1].play()
+                        elif hero.sprite.holster == 2:
+                            shotgunSounds[1].play()    
+                        gameState=0    
+
             if event.type == pygame.QUIT:
                 return True
         screen.fill(BGCOLOR)
         
-        if show_menu == True:
-            render_menu()
-
         process_keys(keys, hero)
-        process_mouse(mouse, hero)
-        
-        if keys[pygame.K_e]:
-            show_menu = not show_menu   
-
+        if gameState==0:
+            process_mouse(mouse, hero)
+        elif gameState==1:
+            render_menu()
+ 
         # Enemy spawning process
         if lastEnemy < currentTime - 200 and len(enemies) < 50:
             spawnSide = random.random()
@@ -141,7 +176,6 @@ def game_loop():
             screen.blit(healthRender, (15 + hp*35, 0))
         scoreRender = scoreFont.render(str(score), True, pygame.Color('black'))
         weaponRender = uiweapons[0]
-        #ammoRender = scoreFont.render(str(ammo), True, pygame.Color('black'))
         
         scoreRect = scoreRender.get_rect()
         scoreRect.right = size[0] - 20
@@ -174,10 +208,8 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-    
-    if keys[pygame.K_r]:
-        done = game_loop()
 
-    if keys[pygame.K_e]:
-        show_menu = not show_menu    
+    
+    if keys[pygame.K_RETURN]:
+        done = game_loop()   
 pygame.quit()

@@ -29,7 +29,7 @@ class Weapon():
 class Pistol(Weapon):
     def __init__(self):
         super().__init__()
-        self.weaponCooldown = 2000
+        self.weaponCooldown = 1500
         self.gunAmmo = 6
 
         self.shoot_sound = pygame.mixer.Sound("sons/player/gun/shot.wav")
@@ -53,7 +53,7 @@ class Pistol(Weapon):
 class Shotgun(Weapon):
     def __init__(self):
         super().__init__()
-        self.weaponCooldown = 1000
+        self.weaponCooldown = 750
         self.spreadArc = 35
         self.projectilesCount = 12
         self.shotgunAmmo = 2
